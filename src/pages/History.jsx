@@ -1,0 +1,289 @@
+"use client"
+
+// pages/History.jsx
+import { useEffect, useState } from "react"
+import { useLanguage } from "../contexts/LanguageContext"
+import { useUVData } from "../contexts/UVDataContext"
+
+export default function History() {
+  const { t } = useLanguage()
+  const { history: contextHistory } = useUVData()
+  const [filteredHistory, setFilteredHistory] = useState([])
+  const [activeFilter, setActiveFilter] = useState("today")
+  const [selectedDate, setSelectedDate] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+
+  const removeDuplicates = (data) => {
+    const unique = new Map()
+    data.forEach((item) => {
+      const key = `${item.date}-${item.time}`
+      if (!unique.has(key)) {
+        unique.set(key, item)
+      }
+    })
+    return Array.from(unique.values())
+  }
+
+  useEffect(() => {
+    if (contextHistory.length > 0) {
+      filterData(contextHistory, activeFilter, selectedDate || null)
+    }
+  }, [contextHistory])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filteredHistory])
+
+  // Filter data based on selected time period or date
+  const filterData = (data, period, customDate = null) => {
+    const now = new Date()
+    let filtered = []
+
+    if (period === "custom" && customDate) {
+      filtered = data.filter((item) => item.date === customDate)
+    } else {
+      switch (period) {
+        case "today": {
+          const todayStr = now.toISOString().split("T")[0]
+          filtered = data.filter((item) => item.date === todayStr)
+          break
+        }
+        case "yesterday": {
+          const yesterday = new Date(now)
+          yesterday.setDate(now.getDate() - 1)
+          const yStr = yesterday.toISOString().split("T")[0]
+          filtered = data.filter((item) => item.date === yStr)
+          break
+        }
+        case "lastWeek": {
+          const lastWeek = new Date(now)
+          lastWeek.setDate(now.getDate() - 7)
+          filtered = data.filter((item) => {
+            const itemDate = new Date(item.date)
+            return itemDate >= lastWeek && itemDate <= now
+          })
+          break
+        }
+        case "lastMonth": {
+          const lastMonth = new Date(now)
+          lastMonth.setMonth(now.getMonth() - 1)
+          filtered = data.filter((item) => {
+            const itemDate = new Date(item.date)
+            return itemDate >= lastMonth && itemDate <= now
+          })
+          break
+        }
+        default:
+          filtered = data
+      }
+    }
+
+    const cleanedFiltered = removeDuplicates(filtered).sort((a, b) => {
+      const dateTimeA = new Date(`${a.date} ${a.time}`)
+      const dateTimeB = new Date(`${b.date} ${b.time}`)
+      return dateTimeB - dateTimeA
+    })
+
+    setFilteredHistory(cleanedFiltered)
+    setActiveFilter(period)
+  }
+
+  const handleFilterClick = (period) => {
+    setSelectedDate("")
+    filterData(contextHistory, period)
+  }
+
+  const handleDateChange = (e) => {
+    const selected = e.target.value
+    setSelectedDate(selected)
+    filterData(contextHistory, "custom", selected)
+    setActiveFilter("custom")
+  }
+
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentPageData = filteredHistory.slice(startIndex, endIndex)
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+  }
+
+  return (
+    <div className="p-4 md:p-6 pb-32">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-orange-700 dark:text-orange-400">
+        📊 {t("history.title")}
+      </h1>
+
+      {/* Navigation Filters */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          {["today", "yesterday", "lastWeek", "lastMonth"].map((period) => (
+            <button
+              key={period}
+              onClick={() => handleFilterClick(period)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeFilter === period
+                  ? "bg-orange-500 text-white"
+                  : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
+              }`}
+            >
+              {period === "today"
+                ? t("history.today") || "Today"
+                : period === "yesterday"
+                  ? t("history.yesterday") || "Yesterday"
+                  : period === "lastWeek"
+                    ? t("history.lastWeek") || "Last Week"
+                    : t("history.lastMonth") || "Last Month"}
+            </button>
+          ))}
+        </div>
+
+        {/* 🗓️ Date Picker */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="date" className="text-sm font-medium text-orange-700 dark:text-orange-400">
+            {t("history.pickDate") || "Pick a Date"}:
+          </label>
+          <input
+            type="date"
+            id="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="border border-orange-300 dark:border-orange-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-sm hover:border-orange-400 focus:ring-2 focus:ring-orange-300 focus:outline-none transition"
+          />
+        </div>
+      </div>
+
+      {/* Results count */}
+      <p className="mt-1 mb-4 text-sm text-gray-600 dark:text-gray-400">
+        Showing {startIndex + 1}-{Math.min(endIndex, filteredHistory.length)} of {filteredHistory.length} record
+        {filteredHistory.length !== 1 ? "s" : ""}{" "}
+        {activeFilter === "custom" && selectedDate && (
+          <span className="text-orange-600 dark:text-orange-400">
+            for {new Date(selectedDate).toLocaleDateString()}
+          </span>
+        )}
+      </p>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md rounded-xl">
+          <thead>
+            <tr className="bg-orange-100 dark:bg-orange-900/30">
+              <th className="py-3 px-4 text-left text-orange-700 dark:text-orange-400">{t("history.date")}</th>
+              <th className="py-3 px-4 text-left text-orange-700 dark:text-orange-400">{t("history.time")}</th>
+              <th className="py-3 px-4 text-left text-orange-700 dark:text-orange-400">{t("history.uvIndex")}</th>
+              <th className="py-3 px-4 text-left text-orange-700 dark:text-orange-400">{t("history.level")}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {currentPageData.map((item, i) => (
+              <tr key={i} className="border-b border-orange-200 dark:border-gray-700">
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.date}</td>
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.time}</td>
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.uvi}</td>
+                <td
+                  className={`py-3 px-4 font-semibold ${
+                    item.level === "High"
+                      ? "text-red-600"
+                      : item.level === "Moderate"
+                        ? "text-yellow-600"
+                        : "text-green-600"
+                  }`}
+                >
+                  {item.level}
+                </td>
+              </tr>
+            ))}
+
+            {/* Empty state */}
+            {filteredHistory.length === 0 && (
+              <tr>
+                <td colSpan="4" className="py-8 px-4 text-center text-gray-500">
+                  No records found for{" "}
+                  {activeFilter === "custom" ? new Date(selectedDate).toLocaleDateString() : activeFilter}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-t border-orange-200 dark:border-gray-700 p-4 shadow-lg z-40">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Page {currentPage} of {totalPages}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  currentPage === 1
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-orange-500 text-white hover:bg-orange-600"
+                }`}
+              >
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex gap-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                          currentPage === pageNum
+                            ? "bg-orange-500 text-white"
+                            : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                    return (
+                      <span key={pageNum} className="w-10 h-10 flex items-center justify-center text-gray-400">
+                        ...
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-orange-500 text-white hover:bg-orange-600"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
