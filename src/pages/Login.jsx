@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useContext, useRef } from "react"
+import { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../main"
 
@@ -12,10 +12,8 @@ export default function Login() {
     username: "",
     email: "",
     password: "",
-    phone: "", // Added phone field
   })
   const [error, setError] = useState("")
-  const authCardRef = useRef(null) // Added ref for scrolling to auth card
 
   const navigate = useNavigate()
   const { login } = useContext(AuthContext)
@@ -28,10 +26,6 @@ export default function Login() {
       ...prev,
       [e.target.name]: e.target.value,
     }))
-  }
-
-  const scrollToAuthCard = () => {
-    authCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
   const handleSubmit = async (e) => {
@@ -52,7 +46,6 @@ export default function Login() {
             email: formData.email,
             first_name: formData.first_name,
             last_name: formData.last_name,
-            phone: formData.phone, // Added phone to registration body
           }
 
       console.log("[v0] Sending request to:", url)
@@ -102,13 +95,6 @@ export default function Login() {
             safety recommendations.
           </p>
 
-          <button
-            onClick={scrollToAuthCard}
-            className="md:hidden w-full py-4 px-6 bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-600 dark:to-orange-700 text-white rounded-lg font-semibold shadow-lg hover:from-yellow-600 hover:to-orange-700 dark:hover:from-yellow-700 dark:hover:to-orange-800 transition-all duration-200 text-lg"
-          >
-            Get Started
-          </button>
-
           {/* Features */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
             {[
@@ -150,7 +136,7 @@ export default function Login() {
         </div>
 
         {/* Auth Card */}
-        <div ref={authCardRef} className="w-full max-w-md mx-auto">
+        <div className="w-full max-w-md mx-auto">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-yellow-200 dark:border-gray-700 p-8 transition-colors duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-2">
               {isLogin ? "Login to UVify" : "Create an Account"}
@@ -158,6 +144,16 @@ export default function Login() {
             <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
               {isLogin ? "Sign in to your account" : "Sign up to get started"}
             </p>
+
+            {isLogin && (
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="md:hidden w-full py-3 px-4 mb-4 bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-600 dark:to-orange-700 text-white rounded-lg font-medium shadow-md hover:from-yellow-600 hover:to-orange-700 dark:hover:from-yellow-700 dark:hover:to-orange-800 transition-all duration-200 text-lg"
+              >
+                Login
+              </button>
+            )}
 
             {error && (
               <div className="mb-4 text-red-600 dark:text-red-400 text-sm font-medium text-center">{error}</div>
@@ -206,17 +202,6 @@ export default function Login() {
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-500 focus:border-transparent transition-colors duration-200"
                 required
               />
-              {!isLogin && (
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-500 focus:border-transparent transition-colors duration-200"
-                  required
-                />
-              )}
               <input
                 type="password"
                 name="password"

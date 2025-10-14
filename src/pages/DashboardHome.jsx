@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { useLanguage } from "../contexts/LanguageContext"
 import { useUVData } from "../contexts/UVDataContext"
 
@@ -9,43 +8,7 @@ export default function DashboardHome() {
   const { isConnected, getStats, lastUpdate } = useUVData()
   const stats = getStats()
 
-  const [currentTime, setCurrentTime] = useState(new Date())
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    })
-  }
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
-
   const quickStats = [
-    {
-      title: t("dashboard.currentDateTime") || "Current Date & Time",
-      value: formatTime(currentTime),
-      unit: formatDate(currentTime),
-      icon: "🕐",
-      color: "from-indigo-400 to-purple-500",
-      textColor: "text-indigo-700 dark:text-indigo-400",
-    },
     {
       title: t("dashboard.todaysPeak"),
       value: stats.todaysPeak !== null ? stats.todaysPeak.toFixed(1) : "--",

@@ -111,7 +111,7 @@ export default function History() {
   }
 
   return (
-    <div className="p-4 md:p-6 pb-32">
+    <div className="p-4 md:p-6">
       <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-orange-700 dark:text-orange-400">
         📊 {t("history.title")}
       </h1>
@@ -212,75 +212,72 @@ export default function History() {
         </table>
       </div>
 
-      {/* Pagination controls */}
       {totalPages > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-t border-orange-200 dark:border-gray-700 p-4 shadow-lg z-40">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Page {currentPage} of {totalPages}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                currentPage === 1
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-orange-500 text-white hover:bg-orange-600"
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNum = index + 1
+                // Show first page, last page, current page, and pages around current
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                        currentPage === pageNum
+                          ? "bg-orange-500 text-white"
+                          : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                  return (
+                    <span key={pageNum} className="w-10 h-10 flex items-center justify-center text-gray-400">
+                      ...
+                    </span>
+                  )
+                }
+                return null
+              })}
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Previous Button */}
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  currentPage === 1
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                    : "bg-orange-500 text-white hover:bg-orange-600"
-                }`}
-              >
-                Previous
-              </button>
-
-              {/* Page Numbers */}
-              <div className="flex gap-1">
-                {[...Array(totalPages)].map((_, index) => {
-                  const pageNum = index + 1
-                  // Show first page, last page, current page, and pages around current
-                  if (
-                    pageNum === 1 ||
-                    pageNum === totalPages ||
-                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => goToPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                          currentPage === pageNum
-                            ? "bg-orange-500 text-white"
-                            : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                    return (
-                      <span key={pageNum} className="w-10 h-10 flex items-center justify-center text-gray-400">
-                        ...
-                      </span>
-                    )
-                  }
-                  return null
-                })}
-              </div>
-
-              {/* Next Button */}
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  currentPage === totalPages
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                    : "bg-orange-500 text-white hover:bg-orange-600"
-                }`}
-              >
-                Next
-              </button>
-            </div>
+            {/* Next Button */}
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                currentPage === totalPages
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-orange-500 text-white hover:bg-orange-600"
+              }`}
+            >
+              Next
+            </button>
           </div>
         </div>
       )}
