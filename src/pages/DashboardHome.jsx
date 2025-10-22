@@ -16,6 +16,7 @@ export default function DashboardHome() {
       icon: "📈",
       color: "from-orange-400 to-red-500",
       textColor: "text-orange-700 dark:text-orange-400",
+      time: stats.todaysPeakTime, // ⏱ added
     },
     {
       title: t("dashboard.currentReading"),
@@ -166,7 +167,9 @@ export default function DashboardHome() {
               <h3 className="text-yellow-800 dark:text-yellow-400 font-semibold">
                 {t("dashboard.deviceNotConnected")}
               </h3>
-              <p className="text-yellow-700 dark:text-yellow-500 text-sm mt-1">{t("dashboard.connectDeviceMessage")}</p>
+              <p className="text-yellow-700 dark:text-yellow-500 text-sm mt-1">
+                {t("dashboard.connectDeviceMessage")}
+              </p>
             </div>
           </div>
         </div>
@@ -188,14 +191,22 @@ export default function DashboardHome() {
               <span className={`text-3xl font-bold ${stat.textColor}`}>{stat.value}</span>
               <span className="text-gray-500 dark:text-gray-500 text-sm">{stat.unit}</span>
             </div>
+
+            {/* 🕒 Display time of today's peak */}
+            {stat.title === t("dashboard.todaysPeak") && stat.time && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {t("at")} {stat.time}
+              </p>
+            )}
           </div>
         ))}
       </div>
 
+      {/* Analytics */}
       <div>
         <h2 className="text-2xl font-bold text-orange-700 dark:text-orange-400 mb-4 flex items-center gap-2">
           <span>📊</span>
-          {t("dashboard.uvAnalytics") || "UV Index Analytics"}
+          {t("UVInformations") || "UV Index Analytics"}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {uvAnalytics.map((item, index) => (

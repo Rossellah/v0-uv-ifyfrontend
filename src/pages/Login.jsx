@@ -145,15 +145,7 @@ export default function Login() {
               {isLogin ? "Sign in to your account" : "Sign up to get started"}
             </p>
 
-            {isLogin && (
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="md:hidden w-full py-3 px-4 mb-4 bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-600 dark:to-orange-700 text-white rounded-lg font-medium shadow-md hover:from-yellow-600 hover:to-orange-700 dark:hover:from-yellow-700 dark:hover:to-orange-800 transition-all duration-200 text-lg"
-              >
-                Login
-              </button>
-            )}
+           
 
             {error && (
               <div className="mb-4 text-red-600 dark:text-red-400 text-sm font-medium text-center">{error}</div>
