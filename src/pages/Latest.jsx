@@ -22,7 +22,7 @@ export default function Latest() {
   const fetchLatestData = async () => {
     try {
       setError(null)
-      const response = await fetch("https://uvify-backend.onrender.com/latest")
+      const response = await fetch("https://uvify-backend-4sjy.onrender.com/latest")
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

@@ -31,7 +31,7 @@ export default function UVAnalyticsChart() {
       setError(null);
 
       // ✅ Prefer /analytics endpoint if available
-      const response = await fetch("https://uvify-backend.onrender.com/analytics");
+      const response = await fetch("https://uvify-backend-4sjy.onrender.com/analytics");
       const data = await response.json();
 
       // ✅ Ensure data is an array

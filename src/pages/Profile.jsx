@@ -22,7 +22,7 @@ export default function Profile() {
     const fetchUser = async () => {
       try {
         const res = await fetch(
-          `https://uvify-backend.onrender.com/profile/${user.user_id}`
+          `https://uvify-backend-4sjy.onrender.com/profile/${user.user_id}`
         );
         const data = await res.json();
 
