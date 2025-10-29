@@ -180,24 +180,33 @@ export default function History() {
           </thead>
 
           <tbody>
-            {currentPageData.map((item, i) => (
-              <tr key={i} className="border-b border-orange-200 dark:border-gray-700">
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.date}</td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.time}</td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.uvi}</td>
-                <td
-                  className={`py-3 px-4 font-semibold ${
-                    item.level === "High"
-                      ? "text-red-600"
-                      : item.level === "Moderate"
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                  }`}
-                >
-                  {item.level}
-                </td>
-              </tr>
-            ))}
+            {currentPageData.map((item, i) => {
+              const getLevelColor = (level) => {
+                switch (level?.toLowerCase()) {
+                  case "low":
+                    return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20"
+                  case "moderate":
+                    return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                  case "high":
+                    return "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20"
+                  case "very high":
+                    return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20"
+                  case "extreme":
+                    return "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20"
+                  default:
+                    return "text-gray-600 dark:text-gray-400"
+                }
+              }
+
+              return (
+                <tr key={i} className="border-b border-orange-200 dark:border-gray-700">
+                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.date}</td>
+                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.time}</td>
+                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{item.uvi}</td>
+                  <td className={`py-3 px-4 font-semibold rounded-lg ${getLevelColor(item.level)}`}>{item.level}</td>
+                </tr>
+              )
+            })}
 
             {/* Empty state */}
             {filteredHistory.length === 0 && (
@@ -219,54 +228,53 @@ export default function History() {
           </div>
 
           <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md py-3 z-50">
-  <div className="flex justify-center items-center gap-2 sm:gap-3">
-    {/* Previous Button */}
-    <button
-      onClick={() => goToPage(currentPage - 1)}
-      disabled={currentPage === 1}
-      className={`min-w-[90px] px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-        currentPage === 1
-          ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-          : "bg-orange-500 text-white hover:bg-orange-600"
-      }`}
-    >
-      Previous
-    </button>
+            <div className="flex justify-center items-center gap-2 sm:gap-3">
+              {/* Previous Button */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`min-w-[90px] px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                  currentPage === 1
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-orange-500 text-white hover:bg-orange-600"
+                }`}
+              >
+                Previous
+              </button>
 
-    {/* Page Numbers */}
-    <div className="flex items-center gap-1 sm:gap-2">
-      {[currentPage - 1, currentPage, currentPage + 1]
-        .filter((page) => page >= 1 && page <= totalPages)
-        .map((pageNum) => (
-          <button
-            key={pageNum}
-            onClick={() => goToPage(pageNum)}
-            className={`w-10 h-10 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-              currentPage === pageNum
-                ? "bg-orange-500 text-white"
-                : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
-            }`}
-          >
-            {pageNum}
-          </button>
-        ))}
-    </div>
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                {[currentPage - 1, currentPage, currentPage + 1]
+                  .filter((page) => page >= 1 && page <= totalPages)
+                  .map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`w-10 h-10 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                        currentPage === pageNum
+                          ? "bg-orange-500 text-white"
+                          : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+              </div>
 
-    {/* Next Button */}
-    <button
-      onClick={() => goToPage(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className={`min-w-[90px] px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-        currentPage === totalPages
-          ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-          : "bg-orange-500 text-white hover:bg-orange-600"
-      }`}
-    >
-      Next
-    </button>
-  </div>
-</div>
-
+              {/* Next Button */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`min-w-[90px] px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-orange-500 text-white hover:bg-orange-600"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

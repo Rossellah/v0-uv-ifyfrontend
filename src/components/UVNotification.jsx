@@ -9,6 +9,7 @@ export default function UVNotification() {
   const { t } = useLanguage()
   const [showNotification, setShowNotification] = useState(false)
   const [hasVibrated, setHasVibrated] = useState(false)
+  const [hasPlayedSound, setHasPlayedSound] = useState(false) // Added sound state
 
   useEffect(() => {
     const stats = getStats()
@@ -17,6 +18,25 @@ export default function UVNotification() {
     if (currentUV !== null && currentUV >= 6) {
       setShowNotification(true)
 
+      if (!hasPlayedSound) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        // Create a warning beep sound: 800Hz for 200ms
+        oscillator.frequency.value = 800
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.2)
+
+        setHasPlayedSound(true)
+      }
+
       if (!hasVibrated && "vibrate" in navigator) {
         navigator.vibrate([200, 100, 200]) // Vibrate pattern: 200ms, pause 100ms, 200ms
         setHasVibrated(true)
@@ -24,8 +44,9 @@ export default function UVNotification() {
     } else {
       setShowNotification(false)
       setHasVibrated(false)
+      setHasPlayedSound(false)
     }
-  }, [getStats, hasVibrated])
+  }, [getStats, hasVibrated, hasPlayedSound])
 
   if (!showNotification) return null
 

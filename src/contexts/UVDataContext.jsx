@@ -95,6 +95,7 @@ export const UVDataProvider = ({ children }) => {
         totalReadings: 0,
         todaysReadings: [],
         weekReadings: [],
+        history: [],
       }
     }
 
@@ -110,12 +111,12 @@ export const UVDataProvider = ({ children }) => {
       return itemDate >= lastWeek && itemDate <= now
     })
 
-    // 🌞 Find today’s peak and its time
+    // 🌞 Find today's peak and its time
     let todaysPeak = null
     let todaysPeakTime = null
     if (todaysReadings.length > 0) {
       const peakItem = todaysReadings.reduce((max, item) =>
-        Number.parseFloat(item.uvi) > Number.parseFloat(max.uvi) ? item : max
+        Number.parseFloat(item.uvi) > Number.parseFloat(max.uvi) ? item : max,
       )
       todaysPeak = Number.parseFloat(peakItem.uvi)
       todaysPeakTime = peakItem.formattedDateTime
@@ -127,10 +128,7 @@ export const UVDataProvider = ({ children }) => {
     // 📆 Weekly average
     const avgThisWeek =
       weekReadings.length > 0
-        ? (
-            weekReadings.reduce((sum, item) => sum + Number.parseFloat(item.uvi), 0) /
-            weekReadings.length
-          ).toFixed(1)
+        ? (weekReadings.reduce((sum, item) => sum + Number.parseFloat(item.uvi), 0) / weekReadings.length).toFixed(1)
         : null
 
     return {
@@ -141,6 +139,7 @@ export const UVDataProvider = ({ children }) => {
       totalReadings: history.length,
       todaysReadings,
       weekReadings,
+      history, // Added history to stats for accumulation calculations
     }
   }
 

@@ -7,7 +7,7 @@ function App() {
   // Fetch latest reading
   const fetchLatest = async () => {
     try {
-      const res = await fetch("https://uvify-backend-4sjy.onrender.com/latest");
+      const res = await fetch("https://uvify-backend.onrender.com/latest");
       const data = await res.json();
       setLatest(data);
     } catch (err) {
@@ -18,7 +18,7 @@ function App() {
   // Fetch history
   const fetchHistory = async () => {
     try {
-      const res = await fetch("https://uvify-backend-4sjy.onrender.com/history");
+      const res = await fetch("https://uvify-backend.onrender.com/history");
       const data = await res.json();
       setHistory(data);
     } catch (err) {

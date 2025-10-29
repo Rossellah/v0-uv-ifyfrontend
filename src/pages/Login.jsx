@@ -19,7 +19,7 @@ export default function Login() {
   const { login } = useContext(AuthContext)
 
   // 🌐 Change this to your Render backend URL
-  const BACKEND_URL = "https://uvify-backend-4sjy.onrender.com"
+  const BACKEND_URL = "https://uvify-backend.onrender.com"
 
   const handleChange = (e) => {
     setFormData((prev) => ({

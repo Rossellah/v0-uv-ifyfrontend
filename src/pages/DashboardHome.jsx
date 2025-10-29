@@ -5,7 +5,7 @@ import { useUVData } from "../contexts/UVDataContext"
 
 export default function DashboardHome() {
   const { t } = useLanguage()
-  const { isConnected, getStats, lastUpdate } = useUVData()
+  const { getStats, lastUpdate } = useUVData()
   const stats = getStats()
 
   const quickStats = [
@@ -16,7 +16,7 @@ export default function DashboardHome() {
       icon: "📈",
       color: "from-orange-400 to-red-500",
       textColor: "text-orange-700 dark:text-orange-400",
-      time: stats.todaysPeakTime, // ⏱ added
+      time: stats.todaysPeakTime,
     },
     {
       title: t("dashboard.currentReading"),
@@ -128,71 +128,41 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-orange-700 dark:text-orange-400">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-orange-700 dark:text-orange-400">
             {t("dashboard.welcome")}
           </h1>
-          <p className="text-orange-600 dark:text-orange-500 mt-1">{t("dashboard.monitorUVLevels")}</p>
+          <p className="text-sm sm:text-base text-orange-600 dark:text-orange-500 mt-1">
+            {t("dashboard.monitorUVLevels")}
+          </p>
           {lastUpdate && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
               Last updated: {lastUpdate.toLocaleTimeString()}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <div
-            className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-              isConnected
-                ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-            }`}
-          >
-            <div
-              className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}
-            ></div>
-            <span className="text-sm font-medium">
-              {isConnected ? t("dashboard.connected") : t("dashboard.waitingForDevice")}
-            </span>
-          </div>
-        </div>
       </div>
 
-      {/* Connection Alert */}
-      {!isConnected && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded-lg">
-          <div className="flex items-start">
-            <span className="text-2xl mr-3">⚠️</span>
-            <div>
-              <h3 className="text-yellow-800 dark:text-yellow-400 font-semibold">
-                {t("dashboard.deviceNotConnected")}
-              </h3>
-              <p className="text-yellow-700 dark:text-yellow-500 text-sm mt-1">
-                {t("dashboard.connectDeviceMessage")}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {quickStats.map((stat, index) => (
           <div
             key={index}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-orange-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border border-orange-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-3xl">{stat.icon}</span>
-              <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${stat.color} opacity-20`}></div>
+              <span className="text-2xl sm:text-3xl">{stat.icon}</span>
+              <div
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br ${stat.color} opacity-20`}
+              ></div>
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">{stat.title}</h3>
+            <h3 className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1">{stat.title}</h3>
             <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-bold ${stat.textColor}`}>{stat.value}</span>
-              <span className="text-gray-500 dark:text-gray-500 text-sm">{stat.unit}</span>
+              <span className={`text-2xl sm:text-3xl font-bold ${stat.textColor}`}>{stat.value}</span>
+              <span className="text-gray-500 dark:text-gray-500 text-xs sm:text-sm">{stat.unit}</span>
             </div>
 
-            {/* 🕒 Display time of today's peak */}
             {stat.title === t("dashboard.todaysPeak") && stat.time && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                 {t("at")} {stat.time}
@@ -204,36 +174,38 @@ export default function DashboardHome() {
 
       {/* Analytics */}
       <div>
-        <h2 className="text-2xl font-bold text-orange-700 dark:text-orange-400 mb-4 flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-orange-700 dark:text-orange-400 mb-3 sm:mb-4 flex items-center gap-2">
           <span>📊</span>
           {t("UVInformations") || "UV Index Analytics"}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {uvAnalytics.map((item, index) => (
             <div
               key={index}
-              className={`${item.bgLight} rounded-xl p-5 border-2 ${item.borderColor} shadow-lg hover:shadow-xl transition-all duration-300`}
+              className={`${item.bgLight} rounded-lg sm:rounded-xl p-4 sm:p-5 border-2 ${item.borderColor} shadow-lg hover:shadow-xl transition-all duration-300`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className={`text-xl font-bold ${item.textColor}`}>{item.level}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className={`text-lg sm:text-xl font-bold ${item.textColor}`}>{item.level}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     UV Index: <span className="font-semibold">{item.range}</span>
                   </p>
                 </div>
-                <div className={`w-12 h-12 ${item.color} rounded-full flex items-center justify-center shadow-md`}>
-                  <span className="text-white text-xl font-bold">{item.range.split("-")[0]}</span>
+                <div
+                  className={`w-10 h-10 sm:w-12 sm:h-12 ${item.color} rounded-full flex items-center justify-center shadow-md flex-shrink-0`}
+                >
+                  <span className="text-white text-lg sm:text-xl font-bold">{item.range.split("-")[0]}</span>
                 </div>
               </div>
 
               <div className="space-y-2 mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Risk Level:</span>
-                  <span className={`text-sm font-bold ${item.textColor}`}>{item.risk}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Risk Level:</span>
+                  <span className={`text-xs sm:text-sm font-bold ${item.textColor}`}>{item.risk}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Burn Time:</span>
-                  <span className={`text-sm font-bold ${item.textColor}`}>{item.burnTime}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Burn Time:</span>
+                  <span className={`text-xs sm:text-sm font-bold ${item.textColor}`}>{item.burnTime}</span>
                 </div>
               </div>
 
@@ -242,7 +214,7 @@ export default function DashboardHome() {
                 <ul className="space-y-1">
                   {item.recommendations.map((rec, idx) => (
                     <li key={idx} className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-1">
-                      <span className="text-orange-500 mt-0.5">•</span>
+                      <span className="text-orange-500 mt-0.5 flex-shrink-0">•</span>
                       <span>{rec}</span>
                     </li>
                   ))}
@@ -254,38 +226,46 @@ export default function DashboardHome() {
       </div>
 
       {/* UV Safety Tips */}
-      <div className="bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-800">
-        <h2 className="text-2xl font-bold text-orange-700 dark:text-orange-400 mb-4 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-orange-200 dark:border-orange-800">
+        <h2 className="text-xl sm:text-2xl font-bold text-orange-700 dark:text-orange-400 mb-3 sm:mb-4 flex items-center gap-2">
           <span>💡</span>
           {t("dashboard.uvSafetyTips")}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">🧴</span>
+            <span className="text-xl sm:text-2xl flex-shrink-0">🧴</span>
             <div>
-              <h3 className="font-semibold text-orange-800 dark:text-orange-400">{t("dashboard.useSunscreen")}</h3>
-              <p className="text-orange-700 dark:text-orange-500 text-sm">{t("dashboard.sunscreenTip")}</p>
+              <h3 className="font-semibold text-orange-800 dark:text-orange-400 text-sm sm:text-base">
+                {t("dashboard.useSunscreen")}
+              </h3>
+              <p className="text-orange-700 dark:text-orange-500 text-xs sm:text-sm">{t("dashboard.sunscreenTip")}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-2xl">🕶️</span>
+            <span className="text-xl sm:text-2xl flex-shrink-0">🕶️</span>
             <div>
-              <h3 className="font-semibold text-orange-800 dark:text-orange-400">{t("dashboard.wearProtection")}</h3>
-              <p className="text-orange-700 dark:text-orange-500 text-sm">{t("dashboard.protectionTip")}</p>
+              <h3 className="font-semibold text-orange-800 dark:text-orange-400 text-sm sm:text-base">
+                {t("dashboard.wearProtection")}
+              </h3>
+              <p className="text-orange-700 dark:text-orange-500 text-xs sm:text-sm">{t("dashboard.protectionTip")}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⏰</span>
+            <span className="text-xl sm:text-2xl flex-shrink-0">⏰</span>
             <div>
-              <h3 className="font-semibold text-orange-800 dark:text-orange-400">{t("dashboard.avoidPeakHours")}</h3>
-              <p className="text-orange-700 dark:text-orange-500 text-sm">{t("dashboard.peakHoursTip")}</p>
+              <h3 className="font-semibold text-orange-800 dark:text-orange-400 text-sm sm:text-base">
+                {t("dashboard.avoidPeakHours")}
+              </h3>
+              <p className="text-orange-700 dark:text-orange-500 text-xs sm:text-sm">{t("dashboard.peakHoursTip")}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-2xl">🌳</span>
+            <span className="text-xl sm:text-2xl flex-shrink-0">🌳</span>
             <div>
-              <h3 className="font-semibold text-orange-800 dark:text-orange-400">{t("dashboard.seekShade")}</h3>
-              <p className="text-orange-700 dark:text-orange-500 text-sm">{t("dashboard.shadeTip")}</p>
+              <h3 className="font-semibold text-orange-800 dark:text-orange-400 text-sm sm:text-base">
+                {t("dashboard.seekShade")}
+              </h3>
+              <p className="text-orange-700 dark:text-orange-500 text-xs sm:text-sm">{t("dashboard.shadeTip")}</p>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import {
   LineChart,
   Line,
@@ -10,130 +10,81 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import { useLanguage } from "../contexts/LanguageContext";
-import { useState, useEffect } from "react";
+} from "recharts"
+import { useLanguage } from "../contexts/LanguageContext"
+import { useUVData } from "../contexts/UVDataContext"
+import { useState, useEffect } from "react"
 
 export default function UVAnalyticsChart() {
-  const { t } = useLanguage();
-  const [historyData, setHistoryData] = useState([]);
-  const [chartType, setChartType] = useState("line");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { t } = useLanguage()
+  const { history: contextHistory } = useUVData()
+  const [chartType, setChartType] = useState("line")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchHistoryData();
-  }, []);
-
-  const fetchHistoryData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // ✅ Prefer /analytics endpoint if available
-      const response = await fetch("https://uvify-backend-4sjy.onrender.com/analytics");
-      const data = await response.json();
-
-      // ✅ Ensure data is an array
-      const records = Array.isArray(data) ? data : [data];
-
-      // ✅ Format & clean
-      const formattedData = records.map((item, index) => ({
-        id: index,
-        date: item.date || "N/A",
-        time: item.time || "N/A",
-        uvi: parseFloat(item.uvi) || 0,
-        dateTime: item.date && item.time ? `${item.date} ${item.time}` : "Unknown",
-        level: item.level || "",
-      }));
-
-      // ✅ Keep only last 20 records
-      setHistoryData(formattedData.slice(-20));
-    } catch (error) {
-      console.error("Error fetching history for charts:", error);
-      setError(t("analytics.errorFetching") || "Error fetching UV data");
-    } finally {
-      setLoading(false);
+    if (contextHistory && contextHistory.length > 0) {
+      setLoading(false)
     }
-  };
+  }, [contextHistory])
+
+  const historyData = contextHistory || []
 
   // ✅ Compute daily averages
   const getDailyAverages = () => {
-    const dailyMap = {};
+    const dailyMap = {}
     historyData.forEach((item) => {
       if (!dailyMap[item.date]) {
-        dailyMap[item.date] = { total: 0, count: 0, date: item.date };
+        dailyMap[item.date] = { total: 0, count: 0, date: item.date }
       }
-      dailyMap[item.date].total += item.uvi;
-      dailyMap[item.date].count += 1;
-    });
+      dailyMap[item.date].total += Number.parseFloat(item.uvi) || 0
+      dailyMap[item.date].count += 1
+    })
     return Object.values(dailyMap).map((day) => ({
       date: new Date(day.date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       }),
-      avgUVI: parseFloat((day.total / day.count).toFixed(2)),
-    }));
-  };
+      avgUVI: Number.parseFloat((day.total / day.count).toFixed(2)),
+    }))
+  }
 
   // ✅ Short-term (hourly) data
   const getHourlyData = () =>
     historyData.slice(-10).map((item) => ({
       time: item.time?.substring(0, 5) || "N/A",
-      uvi: item.uvi,
-    }));
+      uvi: Number.parseFloat(item.uvi) || 0,
+    }))
 
   // ✅ Tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const record = payload[0].payload;
+      const record = payload[0].payload
       return (
         <div className="bg-white dark:bg-gray-800 p-3 border border-orange-300 dark:border-orange-600 rounded-lg shadow-lg">
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {record.date || record.time}
-          </p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{record.date || record.time}</p>
           <p className="text-sm text-orange-600 dark:text-orange-400">
             UV Index: <span className="font-bold">{payload[0].value}</span>
           </p>
         </div>
-      );
+      )
     }
-    return null;
-  };
+    return null
+  }
 
   // ✅ Loading & Error states
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-        <p className="ml-3 text-gray-600 dark:text-gray-400">
-          {t("analytics.loading") || "Loading analytics..."}
-        </p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-300 dark:border-red-600">
-        ⚠️ {error}
-      </div>
-    );
-  }
-
-  if (!historyData.length) {
+  if (loading || !historyData.length) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         {t("analytics.noData") || "No analytics data available yet."}
       </div>
-    );
+    )
   }
 
   // ✅ Quick stats
-  const highestUV = Math.max(...historyData.map((d) => d.uvi)).toFixed(1);
-  const avgUV = (
-    historyData.reduce((sum, d) => sum + d.uvi, 0) / historyData.length
-  ).toFixed(1);
+  const highestUV = Math.max(...historyData.map((d) => Number.parseFloat(d.uvi) || 0)).toFixed(1)
+  const avgUV = (historyData.reduce((sum, d) => sum + (Number.parseFloat(d.uvi) || 0), 0) / historyData.length).toFixed(
+    1,
+  )
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-orange-200 dark:border-gray-700">
@@ -144,8 +95,7 @@ export default function UVAnalyticsChart() {
             📊 {t("analytics.title") || "UV Analytics"}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {t("analytics.subtitle") ||
-              "Track UV radiation patterns and daily averages"}
+            {t("analytics.subtitle") || "Track UV radiation patterns and daily averages"}
           </p>
         </div>
 
@@ -220,12 +170,7 @@ export default function UVAnalyticsChart() {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <Bar
-                  dataKey="avgUVI"
-                  fill="#f97316"
-                  name="Average UV Index"
-                  radius={[8, 8, 0, 0]}
-                />
+                <Bar dataKey="avgUVI" fill="#f97316" name="Average UV Index" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -236,23 +181,17 @@ export default function UVAnalyticsChart() {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
           <p className="text-sm text-gray-600 dark:text-gray-400">Highest UV</p>
-          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-            {highestUV}
-          </p>
+          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{highestUV}</p>
         </div>
         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
           <p className="text-sm text-gray-600 dark:text-gray-400">Average UV</p>
-          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-            {avgUV}
-          </p>
+          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{avgUV}</p>
         </div>
         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
           <p className="text-sm text-gray-600 dark:text-gray-400">Data Points</p>
-          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-            {historyData.length}
-          </p>
+          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{historyData.length}</p>
         </div>
       </div>
     </div>
-  );
+  )
 }
